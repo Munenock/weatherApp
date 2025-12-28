@@ -30,6 +30,7 @@ body {
 
 .weather-app {
   /* max-width: 500px; */
+  width:100vw;
   margin: 0 auto;
   height: 100vh;
   background-color: #fff;
