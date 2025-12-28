@@ -1,10 +1,9 @@
-const fetchWeatherData = async () => {
-   
+const fetchWeatherData = async (enteredLocation) => {
+
     const apiKey = '5NHHFUWHEFL5UWBYUHMRKM2FH'; // Replace with your actual API key
-    const location='kampala,ug';
+    const location=enteredLocation || 'masaka'; // Default location if none provided
     const unitGroup = 'metric'; // Use 'metric' for Celsius, 'us' for Fahrenheit, etc.
-    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/
-    ${location}?unitGroup=${unitGroup}&include=days&key=${apiKey}&contentType=json`;
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?unitGroup=${unitGroup}&include=days&key=${apiKey}&contentType=json`;
 
     try {
         const response = await fetch(url);
@@ -29,6 +28,7 @@ const fetchWeatherData = async () => {
         } else {
             console.error('Error fetching weather data:', error);
         }
+        return null; // Return null or handle the error as needed
     }
 };
 

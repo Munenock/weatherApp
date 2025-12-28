@@ -3,25 +3,28 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import './App.css';
 import fetchData from './fetchData';
+import useGeolocation from './hooks/useGeolocation';
+
 function App() {
+  const [location, setLocation] = useState(null); // Default location
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
+  console.log('Current location:', location);
 
+  const { "isLoading": geoLoading } = useGeolocation(location, setLocation);
   useEffect(() => {
     const getData = async () => {
-      const data = await fetchData();
-      // console.log("Fetched data:", data); 
-      setWeatherData(data);
+      const data = await fetchData(location);
+      data ? setWeatherData(data) : null;
       setLoading(false);
     };
-    
-    getData();
-  }, []);
-  
-// console.log("Weather Data State:", weatherData); // ✅ This will log on each render
 
-  if (loading) {
-    return <div className="loading">Loading...</div>;
+    getData();
+  }, [location]);
+
+  console.log('Weather Data:', weatherData);
+  if (loading || geoLoading) {
+    return <div className="loading">Loading......</div>;
   }
   const today = weatherData.days[0];
   const nextDays = weatherData.days.slice(1, 5); // Get next 4 days
@@ -30,8 +33,37 @@ function App() {
     <div className="weather-app">
       {/* Header with location and menu */}
       <header className="app-header">
-        <h1 className="location">{weatherData.resolvedAddress}</h1>
         <button className="menu-button">☰</button>
+
+        <div className="location-search-container">
+          <h1 className="location">{weatherData.resolvedAddress}</h1>
+
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder={weatherData.resolvedAddress || "Enter location..."}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setLocation(e.target.value);
+                  e.target.value = ''; // Clear input after search
+                }
+              }}
+              className="search-input"
+            />
+            <button
+              className="search-button"
+              onClick={(e) => {
+                const input = e.target.previousElementSibling;
+                if (input.value.trim()) {
+                  setLocation(input.value.trim());
+                  input.value = ''; // Clear input after search
+                }
+              }}
+            >
+              🔍
+            </button>
+          </div>
+        </div>
       </header>
 
       {/* Main weather section */}
