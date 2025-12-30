@@ -23,9 +23,9 @@ function App() {
   }, [location]);
 
   console.log('Weather Data:', weatherData);
-  // if (loading || geoLoading) {
-  //   return <div className="loading">Loading......</div>;
-  // }
+  if (loading || geoLoading) {
+    return <div className="loading">Loading......</div>;
+  }
   const today = weatherData.days[0];
   const nextDays = weatherData.days.slice(1, 5); // Get next 4 days
 
