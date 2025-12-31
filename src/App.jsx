@@ -9,26 +9,34 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [unit, setUnit] = useState(() => localStorage.getItem('unit') || 'C');
 
-  const{ geoLoading}=useGeolocation(location, setLocation);
 
+  const { geoLocation, geoLoading } = useGeolocation();
   useEffect(() => {
+    if (geoLocation && !location) {
+      setLocation(geoLocation);
+    }
+  }, [geoLocation, location]);
+  useEffect(() => {
+    if (!location) return;
+
     const getData = async () => {
       setLoading(true);
       const data = await fetchData(location);
       if (data) setWeatherData(data);
       setLoading(false);
     };
+
     getData();
   }, [location]);
 
   const convertTemp = (tempC) =>
     unit === 'C' ? Math.round(tempC) : Math.round(tempC * 9 / 5 + 32);
 
-  const toggleUnit = () => {
-    const newUnit = unit === 'C' ? 'F' : 'C';
-    setUnit(newUnit);
-    localStorage.setItem('unit', newUnit);
-  };
+  // const toggleUnit = () => {
+  //   const newUnit = unit === 'C' ? 'F' : 'C';
+  //   setUnit(newUnit);
+  //   localStorage.setItem('unit', newUnit);
+  // };
 
   return (
     <div className="weather-app">
@@ -37,8 +45,11 @@ function App() {
 
         <div className="location-search-container">
           <h1 className="location">
-            {weatherData ? weatherData.resolvedAddress : (geoLoading ? 'Locating...' : 'Enter a location')}
+            {geoLoading && !weatherData
+              ? 'Locating...'
+              : weatherData?.resolvedAddress || 'Enter a location'}
           </h1>
+
 
           <div className="search-bar">
             <input
