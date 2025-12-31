@@ -10,11 +10,11 @@ function useGeolocation(location, setLocation) {
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
       );
       const data = await response.json();
-console.log("Reverse geocode data:", data);
+      console.log("Reverse geocode data:", data);
       // Extract place name - you can customize this based on what you want
       if (data.address) {
         // Try different address components in order of specificity
-        const name = data.address.state 
+        const name = data.address.state
 
         return name;
       }

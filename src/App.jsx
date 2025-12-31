@@ -9,7 +9,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [unit, setUnit] = useState(() => localStorage.getItem('unit') || 'C');
 
-  useGeolocation(location, setLocation);
+  const{ geoLoading}=useGeolocation(location, setLocation);
 
   useEffect(() => {
     const getData = async () => {
@@ -33,11 +33,11 @@ function App() {
   return (
     <div className="weather-app">
       <header className="app-header">
-        <button className="menu-button">☰</button>
+        {/* <button className="menu-button">☰</button> */}
 
         <div className="location-search-container">
           <h1 className="location">
-            {weatherData ? weatherData.resolvedAddress : 'Weather'}
+            {weatherData ? weatherData.resolvedAddress : (geoLoading ? 'Locating...' : 'Enter a location')}
           </h1>
 
           <div className="search-bar">
@@ -55,9 +55,9 @@ function App() {
           </div>
         </div>
 
-        <button className="unit-toggle" onClick={toggleUnit}>
+        {/* <button className="unit-toggle" onClick={toggleUnit}>
           °{unit}
-        </button>
+        </button> */}
       </header>
 
       {loading ? (
