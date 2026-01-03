@@ -40,9 +40,7 @@ function App() {
   }, [location, unit, geoLocation]);
 
 
-  const convertTemp = (tempC) =>
-    unit === 'C' ? Math.round(tempC) : Math.round(tempC * 9 / 5 + 32);
-
+  
   const toggleUnit = () => {
     const newUnit = unit === 'C' ? 'F' : 'C';
     setUnit(newUnit);
