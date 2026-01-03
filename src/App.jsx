@@ -106,9 +106,9 @@ function App() {
                               {new Date(day.datetime).toLocaleDateString('en-US', { weekday: 'short' })}
                             </div>
                             <div className="day-temp">
-                              {convertTemp(day.temp)}<i className='day-feels-like'>{day.feelslike}</i>°
+                              {day.temp}<i className='day-feels-like'>{day.feelslike}</i>°
                             </div>
-                            <img src={`public/WeatherIcons/SVG/2nd Set - Monochrome/${day.icon}.svg`} alt="" />
+                            <img src={`/WeatherIcons/SVG/2nd Set - Monochrome/${day.icon}.svg`} alt="" />
                             <div className="day-condition">
                               {day.conditions.split(',')[0]}
                             </div>
@@ -125,7 +125,6 @@ function App() {
               <div className="footer-info">
                 <FooterItem
                   label="High / Low"
-                  value={`${convertTemp(weatherData.days[0].tempmax)}° / ${convertTemp(weatherData.days[0].tempmin)}°`}
                 />
                 <FooterItem label="Sunrise" value={weatherData.days[0].sunrise} />
                 <FooterItem label="Sunset" value={weatherData.days[0].sunset} />
