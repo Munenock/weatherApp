@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import fetchReverseGeocode from "./useGeoReverse";
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 function useGeolocation() {
@@ -26,14 +26,9 @@ function useGeolocation() {
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.latitude}&lon=${coords.longitude}`,
-            {
-              headers: { "User-Agent": "WeatherApp/1.0" }
-            }
-          );
+                
 
-          const data = await res.json();
+          const data = await fetchReverseGeocode(coords);
           const name =
             data.address?.city ||
             data.address?.town ||

@@ -1,45 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import fetchData from './fetchData';
 import useGeolocation from './hooks/useGeolocation';
-
+import SearchBar from './components/SearchBar';
+import fetchReverseGeocode from './hooks/useGeoReverse';
 function App() {
   const [location, setLocation] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unit, setUnit] = useState(() => localStorage.getItem('unit') || 'C');
-
-
+  const [weatherConditionClass, setWeatherConditionClass] = useState('default');
   const { geoLocation, geoLoading } = useGeolocation();
+
+
   useEffect(() => {
     if (geoLocation && !location) {
+      // alert(geoLocation);
       setLocation(geoLocation);
     }
-  }, [geoLocation, location]);
-  useEffect(() => {
     if (!location) return;
 
     const getData = async () => {
       setLoading(true);
-      const data = await fetchData(location);
-      if (data) setWeatherData(data);
+      const data = await fetchData(location, unit);
+      const weatherConditionClass = data ? /rain/.test(data.days[0].icon) ? 'rainy' :
+        /snow/.test(data.days[0].icon) ? 'snowy' :
+          /clear/.test(data.days[0].icon) ? 'clear' :
+            /cloudy/.test(data.days[0].icon) ? 'cloudy' : 'partly-cloudy' : 'default';
+      setWeatherConditionClass(`bg-${weatherConditionClass}`);
+      console.log(data);
+      if (data) {
+        setWeatherData(data)
+
+      };
       setLoading(false);
     };
 
     getData();
-  }, [location]);
+  }, [location, unit, geoLocation]);
+
 
   const convertTemp = (tempC) =>
     unit === 'C' ? Math.round(tempC) : Math.round(tempC * 9 / 5 + 32);
 
-  // const toggleUnit = () => {
-  //   const newUnit = unit === 'C' ? 'F' : 'C';
-  //   setUnit(newUnit);
-  //   localStorage.setItem('unit', newUnit);
-  // };
+  const toggleUnit = () => {
+    const newUnit = unit === 'C' ? 'F' : 'C';
+    setUnit(newUnit);
+    localStorage.setItem('unit', newUnit);
+  };
 
   return (
-    <div className="weather-app">
+    <div className={`weather-app ${weatherConditionClass}`}>
       <header className="app-header">
         {/* <button className="menu-button">☰</button> */}
 
@@ -51,24 +62,12 @@ function App() {
           </h1>
 
 
-          <div className="search-bar">
-            <input
-              className="search-input"
-              placeholder="Enter location..."
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.target.value.trim()) {
-                  setLocation(e.target.value.trim());
-                  e.target.value = '';
-                }
-              }}
-            />
-            <button className="search-button">🔍</button>
-          </div>
+          <SearchBar setLocation={setLocation} currentLocation={weatherData?.resolvedAddress} />
         </div>
 
-        {/* <button className="unit-toggle" onClick={toggleUnit}>
+        <button className="unit-toggle" onClick={toggleUnit}>
           °{unit}
-        </button> */}
+        </button>
       </header>
 
       {loading ? (
@@ -86,8 +85,9 @@ function App() {
                     <div className="current-weather">
                       <div className="weather-type">
                         <h2 className="conditions">{today.conditions}</h2>
+                        <img className='weather-icon' src={`public/WeatherIcons/SVG/2nd Set - Monochrome/${today.icon}.svg`} alt="" />
                         <div className="temperature">
-                          {convertTemp(today.temp)}°{unit}
+                          {today.temp}°<i className='feels-like'>{today.feelslike}</i>{unit}
                         </div>
                         <p className="description">{today.description}</p>
                       </div>
@@ -95,7 +95,7 @@ function App() {
                       <div className="weather-stats">
                         <Stat label="Precip" value={`${today.precip}"`} sub={`${today.precipprob}% chance`} />
                         <Stat label="Humidity" value={`${today.humidity}%`} />
-                        <Stat label="Wind" value={`${today.windspeed} mph`} />
+                        <Stat label="Wind" value={`${today.windspeed} ${unit === 'C' ? 'km/h' : 'mph'}`} />
                       </div>
                     </div>
 
@@ -108,8 +108,9 @@ function App() {
                               {new Date(day.datetime).toLocaleDateString('en-US', { weekday: 'short' })}
                             </div>
                             <div className="day-temp">
-                              {convertTemp(day.temp)}°
+                              {convertTemp(day.temp)}<i className='day-feels-like'>{day.feelslike}</i>°
                             </div>
+                            <img src={`public/WeatherIcons/SVG/2nd Set - Monochrome/${day.icon}.svg`} alt="" />
                             <div className="day-condition">
                               {day.conditions.split(',')[0]}
                             </div>
