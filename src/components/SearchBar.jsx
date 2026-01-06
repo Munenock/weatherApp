@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import debounce from 'lodash.debounce'; // npm install lodash.debounce
 import fetchReverseGeocode from '../hooks/useGeoReverse';
+import { FaRegHourglass } from "react-icons/fa";
 const SearchBar = ({ setLocation, currentLocation }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -11,9 +12,8 @@ const SearchBar = ({ setLocation, currentLocation }) => {
   const [error, setError] = useState(null);
   const searchRef = useRef(null);
 
-  // Debounced search function
   const searchLocations = useCallback(
-    debounce(async (searchTerm) => {
+    debounce(async (searchTerm) => {//debouncing to limit API calls
       if (!searchTerm.trim() || searchTerm.length < 2) {
         setSuggestions([]);
         return;
@@ -27,7 +27,7 @@ const SearchBar = ({ setLocation, currentLocation }) => {
         setSuggestions(results);
         setShowDropdown(results.length > 0);
       } catch (err) {
-        setError('Failed to fetch locations:',err);
+        setError('Failed to fetch locations:', err);
         setSuggestions([]);
       } finally {
         setLoading(false);
@@ -36,7 +36,6 @@ const SearchBar = ({ setLocation, currentLocation }) => {
     []
   );
 
-  // Handle input change
   const handleInputChange = (e) => {
     const value = e.target.value;
     setQuery(value);
@@ -44,22 +43,19 @@ const SearchBar = ({ setLocation, currentLocation }) => {
   };
 
   useEffect(() => {
-setLocation(reversedLocation?  `${reversedLocation.lat},${reversedLocation.lon}`:reversedLocation?.display_name );
+    setLocation(reversedLocation ? `${reversedLocation.lat},${reversedLocation.lon}` : reversedLocation?.display_name);
   }, [reversedLocation]);
-  // Handle suggestion selection
 
   const handleSuggestionClick = async (suggestion) => {
-    const r=await fetchReverseGeocode(suggestion)
- setReversedLocation(r);
-    // currentLocation= await fetchReverseGeocode(suggestion)
-    console.log (reversedLocation);
-    setLocation(suggestion?  `${suggestion.latitude},${suggestion.longitude}`:suggestion.display_name );
+    const r = await fetchReverseGeocode(suggestion)
+    setReversedLocation(r);
+    console.log(reversedLocation);
+    setLocation(suggestion ? `${suggestion.latitude},${suggestion.longitude}` : suggestion.display_name);
     setQuery('');
     setSuggestions([]);
     setShowDropdown(false);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -73,49 +69,50 @@ setLocation(reversedLocation?  `${reversedLocation.lat},${reversedLocation.lon}`
 
   // Keyboard navigation
   const handleKeyDown = (e) => {
-    // console.log(e.key);
     if (e.key === 'Escape') {
       setShowDropdown(false);
     } else if (e.key === 'Enter' && query.trim()) {
-      // Use first suggestion or search directly
       if (suggestions.length > 0) {
-        handleSuggestionClick(suggestions[0]);
-      } 
+        handleSuggestionClick(suggestions[0]);//use first suggestion on enter
+      }
     }
   };
 
   return (
     <div className="search-container" ref={searchRef}>
       <div className="search-input-wrapper">
+
         <input
           type="text"
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowDropdown(true)}
-          placeholder={reversedLocation&&reversedLocation.display_name||currentLocation || "Search city or location..."}
+          placeholder={reversedLocation && reversedLocation.display_name || currentLocation || "Search city or location..."}
           className="search-input"
           aria-label="Search location"
         />
-        {loading && <div className="search-spinner">⏳</div>}
+        {loading && (<div className="search-spinner"><FaRegHourglass className='hourGlass' /></div>)}
         {!loading && query && (
-          <button 
+          <button
             className="clear-button"
             onClick={() => setQuery('')}
             aria-label="Clear search"
           >
             ✕
+
           </button>
+
         )}
       </div>
 
-      {/* Dropdown Suggestions */}
+
       {showDropdown && (
         <div className="suggestions-dropdown">
           {error && (
             <div className="suggestion-error">{error}</div>
           )}
-          
+
           {suggestions.length > 0 ? (
             <ul className="suggestions-list">
               {suggestions.map((suggestion) => (
@@ -151,22 +148,27 @@ setLocation(reversedLocation?  `${reversedLocation.lat},${reversedLocation.lon}`
   );
 };
 
-// API call for location suggestions
 async function fetchLocationSuggestions(query) {
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
-    );
-    
-    if (!response.ok) throw new Error('Search failed');
-    
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=7`
+      , {
+        headers: { "User-Agent": "WeatherApp/1.0" }
+      }
+    )
+    if (!response.ok) {
+
+      alert('Error fetching location suggestions');
+      throw new Error('Search failed')
+    };
+
     const data = await response.json();
-    
+
     return data.map(item => ({
       id: item.place_id,
       display_name: item.display_name,
       latitude: item.lat,
-      longitude:item.lon,
+      longitude: item.lon,
       address: item.address,
       type: item.type
     }));

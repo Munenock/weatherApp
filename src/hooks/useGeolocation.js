@@ -8,6 +8,7 @@ function useGeolocation() {
 
   useEffect(() => {
     if (!navigator.geolocation) {
+      alert("Failed to access your location, search manually instead.");
       setGeoLoading(false);
       return;
     }

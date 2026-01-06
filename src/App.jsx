@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
-import fetchData from './fetchData';
+import fetchWeatherData from './services/fetchWeatherData';
 import useGeolocation from './hooks/useGeolocation';
 import SearchBar from './components/SearchBar';
-import fetchReverseGeocode from './hooks/useGeoReverse';
+// import fetchReverseGeocode from './hooks/useGeoReverse';
 function App() {
   const [location, setLocation] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
@@ -22,7 +22,7 @@ function App() {
 
     const getData = async () => {
       setLoading(true);
-      const data = await fetchData(location, unit);
+      const data = await fetchWeatherData(location, unit);
       const weatherConditionClass = data ? /rain/.test(data.days[0].icon) ? 'rainy' :
         /snow/.test(data.days[0].icon) ? 'snowy' :
           /clear/.test(data.days[0].icon) ? 'clear' :
@@ -83,7 +83,7 @@ function App() {
                     <div className="current-weather">
                       <div className="weather-type">
                         <h2 className="conditions">{today.conditions}</h2>
-                        <img className='weather-icon' src={`public/WeatherIcons/SVG/2nd Set - Monochrome/${today.icon}.svg`} alt="" />
+                        <img className='weather-icon' src={`/WeatherIcons/SVG/2nd Set - Monochrome/${today.icon}.svg`} alt="" />
                         <div className="temperature">
                           {today.temp}°<i className='feels-like'>{today.feelslike}</i>{unit}
                         </div>
